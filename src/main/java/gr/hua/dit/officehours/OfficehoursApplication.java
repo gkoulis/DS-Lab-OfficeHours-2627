@@ -9,5 +9,4 @@ public class OfficehoursApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OfficehoursApplication.class, args);
 	}
-
 }
