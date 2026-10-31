@@ -24,6 +24,10 @@ public class DiagnosticsResource {
         sb.append("# Diagnostics");
         sb.append("\n\n");
 
+        final var mostRecentPerson = this.personRepository.findFirstByOrderByCreatedAtDesc().orElse(null);
+        sb.append("## Most Recent Registration").append("\n").append(mostRecentPerson);
+        sb.append("\n\n");
+
         final var students = this.personRepository.findAllByType(PersonType.STUDENT);
         final String studentsString = String.join(
             "\n", students.stream().map(Person::toString).toList());
