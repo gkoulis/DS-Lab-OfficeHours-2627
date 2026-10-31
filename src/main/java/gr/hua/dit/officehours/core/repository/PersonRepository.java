@@ -10,7 +10,11 @@ import java.util.List;
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-    List<Person> findByHuaIdStartsWithAndType(String prefix, PersonType type);
-
     List<Person> findAllByType(PersonType type);
+
+    // TODO έλεγχος για το αν υπάρχει με βάση το email.
+
+    // TODO έλεγχος για το αν υπάρχει με βάση το κινητό τηλέφωνο.
+
+    // TODO έλεγχος για το αν υπάρχει με βάση το HUA ID.
 }
