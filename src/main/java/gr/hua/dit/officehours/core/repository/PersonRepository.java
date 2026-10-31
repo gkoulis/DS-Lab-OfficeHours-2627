@@ -14,4 +14,10 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     List<Person> findAllByType(PersonType type);
 
     Optional<Person> findFirstByOrderByCreatedAtDesc();
+
+    boolean existsByEmailAddressIgnoreCase(final String emailAddress);
+
+    boolean existsByMobilePhoneNumber(final String mobilePhoneNumber);
+
+    boolean existsByHuaId(final String huaId);
 }
