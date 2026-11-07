@@ -11,11 +11,13 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login() {
-        throw new UnsupportedOperationException();
+        // TODO If user is authenticated, redirect to default view.
+        return "login";
     }
 
     @GetMapping("/logout")
     public String logout() {
-        throw new UnsupportedOperationException();
+        // TODO If user is not authenticated, redirect to login.
+        return "logout";
     }
 }
