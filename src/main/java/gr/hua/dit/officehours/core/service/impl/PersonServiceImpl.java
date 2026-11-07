@@ -2,6 +2,10 @@ package gr.hua.dit.officehours.core.service.impl;
 
 import gr.hua.dit.officehours.core.model.Person;
 import gr.hua.dit.officehours.core.model.PersonType;
+import gr.hua.dit.officehours.core.port.LookupPort;
+import gr.hua.dit.officehours.core.port.PhoneNumberPort;
+import gr.hua.dit.officehours.core.port.SmsNotificationPort;
+import gr.hua.dit.officehours.core.port.dto.PhoneNumberValidationResult;
 import gr.hua.dit.officehours.core.repository.PersonRepository;
 import gr.hua.dit.officehours.core.service.RegistrationService;
 import gr.hua.dit.officehours.core.service.mapper.PersonMapper;
@@ -23,15 +27,26 @@ public class PersonServiceImpl implements RegistrationService {
 
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
-    // TODO Δηλώστε τα Ports, δηλαλή τις κλάσεις οι οποίες αναλαμβάνουν την επικοινωνία με την εξωτερική υπηρεσία.
+    private final PhoneNumberPort phoneNumberPort;
+    private final LookupPort lookupPort;
+    private final SmsNotificationPort smsNotificationPort;
 
     public PersonServiceImpl(final PersonRepository personRepository,
-                             final PersonMapper personMapper) {
+                             final PersonMapper personMapper,
+                             final PhoneNumberPort phoneNumberPort,
+                             final LookupPort lookupPort,
+                             final SmsNotificationPort smsNotificationPort) {
         if (personRepository == null) throw new NullPointerException();
         if (personMapper == null) throw new NullPointerException();
+        if (phoneNumberPort == null) throw new NullPointerException();
+        if (lookupPort == null) throw new NullPointerException();
+        if (smsNotificationPort == null) throw new NullPointerException();
 
         this.personRepository = personRepository;
         this.personMapper = personMapper;
+        this.phoneNumberPort = phoneNumberPort;
+        this.lookupPort = lookupPort;
+        this.smsNotificationPort = smsNotificationPort;
     }
 
     @Override
@@ -59,7 +74,13 @@ public class PersonServiceImpl implements RegistrationService {
         // Advanced mobile phone number validation.
         // --------------------------------------------------
 
-        // TODO Χρησιμοποιήστε την εξωτερική υπηρεσία για να επαληθεύσετε τον αριθμό τηλεφώνου.
+        final PhoneNumberValidationResult phoneNumberValidationResult
+            = this.phoneNumberPort.validate(mobilePhoneNumber);
+        // TODO Exception handler - NOC is not available; try again later!
+        if (!phoneNumberValidationResult.isValidMobile()) {
+            return RegistrationResult.fail("Mobile Phone Number is not valid");
+        }
+        mobilePhoneNumber = phoneNumberValidationResult.e164();
 
         // --------------------------------------------------
 
@@ -77,8 +98,14 @@ public class PersonServiceImpl implements RegistrationService {
 
         // --------------------------------------------------
 
-        // TODO Χρησιμοποιήστε την εξωτερική υπηρεσία για να βρείτε τον τύπο του ΑΜ (αν υπάρχει).
-        // TODO Αφού το NOC μου επιστρέφει τον τύπο, μπορώ να το αφαιρέσω από τη φόρμα για να βελτιώσω την εμπειρία του χρήστη;
+        final PersonType personType_lookup = this.lookupPort.lookup(huaId).orElse(null);
+        // TODO Exception handler - NOC is not available; try again later!
+        if (personType_lookup == null) {
+            return RegistrationResult.fail("Invalid HUA ID");
+        }
+        if (personType_lookup != type) {
+            return RegistrationResult.fail("The provided person type does not match the actual one");
+        }
 
         // --------------------------------------------------
 
@@ -105,7 +132,16 @@ public class PersonServiceImpl implements RegistrationService {
 
         // --------------------------------------------------
 
-        // TODO Χρησιμοποιήστε την εξωτερική υπηρεσία για να στείλετε SMS στο νέο χρήστη!
+        final String content = String.format(
+            "You have successfully registered for the Office Hours application. " +
+                "Use your email (%s) to log in.",
+            emailAddress);
+        final boolean sent = this.smsNotificationPort.sendSms(mobilePhoneNumber, content);
+        // TODO Exception handler - NOC is not available; try again later!
+        // TODO Ας δοκιμάσουμε εγγραφή με σφάλμα στο SMS. Τι παρατηρούμε; Πώς το λύνουμε;
+        if (!sent) {
+            LOGGER.warn("SMS send to {} failed!", mobilePhoneNumber);
+        }
 
         // Map `Person` to `PersonView`.
         // --------------------------------------------------
