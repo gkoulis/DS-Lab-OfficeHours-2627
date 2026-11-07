@@ -1,9 +1,9 @@
 package gr.hua.dit.officehours.web.ui;
 
 import gr.hua.dit.officehours.core.model.PersonType;
-import gr.hua.dit.officehours.core.service.PersonRegistrationService;
-import gr.hua.dit.officehours.core.service.model.RegisterPersonRequest;
-import gr.hua.dit.officehours.core.service.model.RegisterPersonResult;
+import gr.hua.dit.officehours.core.service.RegistrationService;
+import gr.hua.dit.officehours.core.service.model.RegistrationRequest;
+import gr.hua.dit.officehours.core.service.model.RegistrationResult;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class RegistrationController {
 
-    private final PersonRegistrationService personRegistrationService;
+    private final RegistrationService personRegistrationService;
 
-    public RegistrationController(final PersonRegistrationService personRegistrationService) {
+    public RegistrationController(final RegistrationService personRegistrationService) {
         if (personRegistrationService == null) throw new NullPointerException();
         this.personRegistrationService = personRegistrationService;
     }
@@ -28,14 +28,14 @@ public class RegistrationController {
     public String showRegistrationForm(final Model model) {
         // TODO if user is authenticated, redirect to tickets
         // Initial data for the form.
-        final RegisterPersonRequest registerPersonRequest = new RegisterPersonRequest(PersonType.STUDENT, "", "", "", "", "", "");
-        model.addAttribute("registerPersonRequest", registerPersonRequest);
+        final RegistrationRequest registrationRequest = new RegistrationRequest(PersonType.STUDENT, "", "", "", "", "", "");
+        model.addAttribute("registrationRequest", registrationRequest);
         return "register";
     }
 
     @PostMapping("/register")
     public String handleFormSubmission(
-        @ModelAttribute("registerPersonRequest") final RegisterPersonRequest registerPersonRequest,
+        @ModelAttribute("registrationRequest") final RegistrationRequest registrationRequest,
         final Model model
     ) {
         // TODO if user is authenticated, redirect to tickets
@@ -44,12 +44,12 @@ public class RegistrationController {
         // TODO Try to create Person.
         // TODO Handle Person creation failure.
         // TODO Redirect to login.
-        final RegisterPersonResult registerPersonResult = this.personRegistrationService.register(registerPersonRequest);
-        if (registerPersonResult.created()) {
+        final RegistrationResult registrationResult = this.personRegistrationService.register(registrationRequest);
+        if (registrationResult.created()) {
             return "redirect:/login"; // registration successful - redirect to login form (not yet ready)
         }
-        model.addAttribute("registerPersonRequest", registerPersonRequest); // Pass the same form data.
-        model.addAttribute("errorMessage", registerPersonResult.reason()); // Show an error message!
+        model.addAttribute("registrationRequest", registrationRequest); // Pass the same form data.
+        model.addAttribute("errorMessage", registrationResult.reason()); // Show an error message!
         return "register";
     }
 }

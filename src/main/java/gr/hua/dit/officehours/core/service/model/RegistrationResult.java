@@ -3,20 +3,20 @@ package gr.hua.dit.officehours.core.service.model;
 /**
  * RegisterPersonResult DTO.
  */
-public record RegisterPersonResult(
+public record RegistrationResult(
     boolean created,
     String reason,
     PersonView personView
 ) {
 
-    public static RegisterPersonResult success(final PersonView personView) {
+    public static RegistrationResult success(final PersonView personView) {
         if (personView == null) throw new NullPointerException();
-        return new RegisterPersonResult(true, null, personView);
+        return new RegistrationResult(true, null, personView);
     }
 
-    public static RegisterPersonResult fail(final String reason) {
+    public static RegistrationResult fail(final String reason) {
         if (reason == null) throw new NullPointerException();
         if (reason.isBlank()) throw new IllegalArgumentException();
-        return new RegisterPersonResult(false, reason, null);
+        return new RegistrationResult(false, reason, null);
     }
 }
