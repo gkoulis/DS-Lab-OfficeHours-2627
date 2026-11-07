@@ -19,5 +19,5 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     boolean existsByMobilePhoneNumber(final String mobilePhoneNumber);
 
-    boolean existsByHuaId(final String huaId);
+    boolean existsByHuaIdIgnoreCase(final String huaId);
 }
