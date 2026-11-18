@@ -26,27 +26,23 @@ public class PersonRegistrationServiceImpl implements PersonRegistrationService 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PersonRegistrationServiceImpl.class);
 
-    private final PasswordEncoder passwordEncoder;
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
     private final PhoneNumberPort phoneNumberPort;
     private final LookupPort lookupPort;
     private final SmsNotificationPort smsNotificationPort;
 
-    public PersonRegistrationServiceImpl(final PasswordEncoder passwordEncoder,
-                                         final PersonRepository personRepository,
+    public PersonRegistrationServiceImpl(final PersonRepository personRepository,
                                          final PersonMapper personMapper,
                                          final PhoneNumberPort phoneNumberPort,
                                          final LookupPort lookupPort,
                                          final SmsNotificationPort smsNotificationPort) {
-        if (passwordEncoder == null) throw new NullPointerException();
         if (personRepository == null) throw new NullPointerException();
         if (personMapper == null) throw new NullPointerException();
         if (phoneNumberPort == null) throw new NullPointerException();
         if (lookupPort == null) throw new NullPointerException();
         if (smsNotificationPort == null) throw new NullPointerException();
 
-        this.passwordEncoder = passwordEncoder;
         this.personRepository = personRepository;
         this.personMapper = personMapper;
         this.phoneNumberPort = phoneNumberPort;
@@ -112,7 +108,8 @@ public class PersonRegistrationServiceImpl implements PersonRegistrationService 
 
         // --------------------------------------------------
 
-        final String hashedPassword = this.passwordEncoder.encode(rawPassword);
+        // TODO EXERCISE 2: Never store a raw password. Use an encoder to encode password.
+        final String hashedPassword = rawPassword;
 
         // Instantiate person.
         // --------------------------------------------------

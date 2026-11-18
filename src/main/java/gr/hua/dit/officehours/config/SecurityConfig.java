@@ -7,8 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -29,22 +27,22 @@ public class SecurityConfig {
         http
             .securityMatcher("/**")
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/register").permitAll() // Public
-                .requestMatchers("/profile", "/logout").authenticated() // Private
-                .anyRequest().permitAll() // the rest
+                // TODO EXERCISE permit all: / /login /register
+                // TODO EXERCISE authenticated: /profile /logout
+                .anyRequest().permitAll() // everything else.
             )
             .formLogin(form -> form
                 .loginPage("/login") // custom login page (see login.html)
                 .loginProcessingUrl("/login") // POST request target (handled by Spring Security)
                 .defaultSuccessUrl("/profile", true)
-                .failureUrl("/login?error")
+                // TODO EXERCISE failure url /login? (error)
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/logout") // POST request target (handled by Spring Security)
-                .logoutSuccessUrl("/login?logout")
-                .deleteCookies("JSESSIONID")
-                .invalidateHttpSession(true)
+                // .logoutUrl("/logout") // POST request target (handled by Spring Security) // TODO EXERCISE uncomment
+                // TODO logout success url (+ message?)
+                // TODO EXERCISE Delete cookies JSESSIONID
+                // TODO EXERCISE invalidate HTTP Session.
                 .permitAll()
             )
             // Disable basic security.
@@ -53,10 +51,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    // TODO EXERCISE We need a password encoder.
 
     @Bean
     public AuthenticationManager authenticationManager(final AuthenticationConfiguration config) throws Exception {
