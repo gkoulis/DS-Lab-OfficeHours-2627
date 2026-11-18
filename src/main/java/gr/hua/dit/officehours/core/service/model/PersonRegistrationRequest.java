@@ -5,7 +5,7 @@ import gr.hua.dit.officehours.core.model.PersonType;
 /**
  * DTO for requesting the registration of a Person.
  */
-public record RegistrationRequest(
+public record PersonRegistrationRequest(
     PersonType type,
     String huaId,
     String firstName,

@@ -7,41 +7,46 @@ import gr.hua.dit.officehours.core.port.PhoneNumberPort;
 import gr.hua.dit.officehours.core.port.SmsNotificationPort;
 import gr.hua.dit.officehours.core.port.dto.PhoneNumberValidationResult;
 import gr.hua.dit.officehours.core.repository.PersonRepository;
-import gr.hua.dit.officehours.core.service.RegistrationService;
+import gr.hua.dit.officehours.core.service.PersonRegistrationService;
 import gr.hua.dit.officehours.core.service.mapper.PersonMapper;
-import gr.hua.dit.officehours.core.service.model.RegistrationRequest;
-import gr.hua.dit.officehours.core.service.model.RegistrationResult;
+import gr.hua.dit.officehours.core.service.model.PersonRegistrationRequest;
+import gr.hua.dit.officehours.core.service.model.PersonRegistrationResult;
 import gr.hua.dit.officehours.core.service.model.PersonView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link gr.hua.dit.officehours.core.service.RegistrationService}.
+ * Default implementation of {@link PersonRegistrationService}.
  */
 @Service
-public class PersonServiceImpl implements RegistrationService {
+public class PersonRegistrationServiceImpl implements PersonRegistrationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PersonServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonRegistrationServiceImpl.class);
 
+    private final PasswordEncoder passwordEncoder;
     private final PersonRepository personRepository;
     private final PersonMapper personMapper;
     private final PhoneNumberPort phoneNumberPort;
     private final LookupPort lookupPort;
     private final SmsNotificationPort smsNotificationPort;
 
-    public PersonServiceImpl(final PersonRepository personRepository,
-                             final PersonMapper personMapper,
-                             final PhoneNumberPort phoneNumberPort,
-                             final LookupPort lookupPort,
-                             final SmsNotificationPort smsNotificationPort) {
+    public PersonRegistrationServiceImpl(final PasswordEncoder passwordEncoder,
+                                         final PersonRepository personRepository,
+                                         final PersonMapper personMapper,
+                                         final PhoneNumberPort phoneNumberPort,
+                                         final LookupPort lookupPort,
+                                         final SmsNotificationPort smsNotificationPort) {
+        if (passwordEncoder == null) throw new NullPointerException();
         if (personRepository == null) throw new NullPointerException();
         if (personMapper == null) throw new NullPointerException();
         if (phoneNumberPort == null) throw new NullPointerException();
         if (lookupPort == null) throw new NullPointerException();
         if (smsNotificationPort == null) throw new NullPointerException();
 
+        this.passwordEncoder = passwordEncoder;
         this.personRepository = personRepository;
         this.personMapper = personMapper;
         this.phoneNumberPort = phoneNumberPort;
@@ -50,7 +55,7 @@ public class PersonServiceImpl implements RegistrationService {
     }
 
     @Override
-    public RegistrationResult register(final RegistrationRequest request) {
+    public PersonRegistrationResult register(final PersonRegistrationRequest request, final boolean notify) {
         if (request == null) throw new NullPointerException();
 
         // Unpack (we assume valid `CreatePersonRequest` instance)
@@ -68,7 +73,7 @@ public class PersonServiceImpl implements RegistrationService {
         // --------------------------------------------------
 
         if (!emailAddress.endsWith("@hua.gr")) {
-            return RegistrationResult.fail("Only academic email addresses (@hua.gr) are allowed");
+            return PersonRegistrationResult.fail("Only academic email addresses (@hua.gr) are allowed");
         }
 
         // Advanced mobile phone number validation.
@@ -76,40 +81,38 @@ public class PersonServiceImpl implements RegistrationService {
 
         final PhoneNumberValidationResult phoneNumberValidationResult
             = this.phoneNumberPort.validate(mobilePhoneNumber);
-        // TODO Exception handler - NOC is not available; try again later!
         if (!phoneNumberValidationResult.isValidMobile()) {
-            return RegistrationResult.fail("Mobile Phone Number is not valid");
+            return PersonRegistrationResult.fail("Mobile Phone Number is not valid");
         }
         mobilePhoneNumber = phoneNumberValidationResult.e164();
 
         // --------------------------------------------------
 
         if (this.personRepository.existsByHuaIdIgnoreCase(huaId)) {
-            return RegistrationResult.fail("HUA ID already registered");
+            return PersonRegistrationResult.fail("HUA ID already registered");
         }
 
         if (this.personRepository.existsByEmailAddressIgnoreCase(emailAddress)) {
-            return RegistrationResult.fail("Email Address already registered");
+            return PersonRegistrationResult.fail("Email Address already registered");
         }
 
         if (this.personRepository.existsByMobilePhoneNumber(mobilePhoneNumber)) {
-            return RegistrationResult.fail("Mobile Phone Number already registered");
+            return PersonRegistrationResult.fail("Mobile Phone Number already registered");
         }
 
         // --------------------------------------------------
 
         final PersonType personType_lookup = this.lookupPort.lookup(huaId).orElse(null);
-        // TODO Exception handler - NOC is not available; try again later!
         if (personType_lookup == null) {
-            return RegistrationResult.fail("Invalid HUA ID");
+            return PersonRegistrationResult.fail("Invalid HUA ID");
         }
         if (personType_lookup != type) {
-            return RegistrationResult.fail("The provided person type does not match the actual one");
+            return PersonRegistrationResult.fail("The provided person type does not match the actual one");
         }
 
         // --------------------------------------------------
 
-        final String hashedPassword = rawPassword; // TODO Implement: encode password.
+        final String hashedPassword = this.passwordEncoder.encode(rawPassword);
 
         // Instantiate person.
         // --------------------------------------------------
@@ -132,15 +135,14 @@ public class PersonServiceImpl implements RegistrationService {
 
         // --------------------------------------------------
 
-        final String content = String.format(
-            "You have successfully registered for the Office Hours application. " +
-                "Use your email (%s) to log in.",
-            emailAddress);
-        final boolean sent = this.smsNotificationPort.sendSms(mobilePhoneNumber, content);
-        // TODO Exception handler - NOC is not available; try again later!
-        // TODO Ας δοκιμάσουμε εγγραφή με σφάλμα στο SMS. Τι παρατηρούμε; Πώς το λύνουμε;
-        if (!sent) {
-            LOGGER.warn("SMS send to {} failed!", mobilePhoneNumber);
+        if (notify) {
+            final String content = String.format(
+                "You have successfully registered for the Office Hours application. " +
+                    "Use your email (%s) to log in.", emailAddress);
+            final boolean sent = this.smsNotificationPort.sendSms(mobilePhoneNumber, content);
+            if (!sent) {
+                LOGGER.warn("SMS send to {} failed!", mobilePhoneNumber);
+            }
         }
 
         // Map `Person` to `PersonView`.
@@ -150,6 +152,6 @@ public class PersonServiceImpl implements RegistrationService {
 
         // --------------------------------------------------
 
-        return RegistrationResult.success(personView);
+        return PersonRegistrationResult.success(personView);
     }
 }
