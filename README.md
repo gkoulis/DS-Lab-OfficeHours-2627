@@ -14,7 +14,7 @@
 | Εργαστήριο 3 | 05/11 | Registration | [1ccdf623](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/1ccdf623a04c530f271fae9786554e57b7a1f264) | [731d61af](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/731d61af8002c335d45350b2ebc6ae4a523ac8ba) |
 | Εργαστήριο 4 | 12/11 | External Service| - | [gkoulis/DS-Lab-NOC](https://github.com/gkoulis/DS-Lab-NOC) |
 | Εργαστήριο 4 | 12/11 | External Service Calls | [254a1b2](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/254a1b2dd774b3fb3d642d390d0ca861a8885528) | [d900a7c](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/d900a7c5de51bd1f40c9098d2b145fe313377d89) |
-| Εργαστήριο 5 | 19/11 | Security + Thymeleaf | [1787b41](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/1787b4151a0dc1c440597ca9a4e445f0df451c4e) | - |
+| Εργαστήριο 5 | 19/11 | Security + Thymeleaf | [1787b41](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/1787b4151a0dc1c440597ca9a4e445f0df451c4e) | [b3f225c](https://github.com/gkoulis/DS-Lab-OfficeHours-2627/tree/b3f225c8d376d8b6005d9cd5c5d6fe2aa0355c60) |
 
 ---
 
