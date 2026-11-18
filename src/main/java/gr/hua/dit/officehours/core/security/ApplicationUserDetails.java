@@ -47,18 +47,22 @@ public final class ApplicationUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // TODO EXERCISE Use person type as role (ROLE_). Use SimpleGrantedAuthority.
-        return Collections.emptyList();
+        final String role;
+        if (this.type == PersonType.TEACHER) role = "ROLE_TEACHER";
+        else if (this.type == PersonType.STUDENT) role = "ROLE_STUDENT";
+        else if (this.type == PersonType.STAFF) role = "ROLE_STAFF";
+        else throw new RuntimeException("Invalid type: " + this.type);
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override
     public String getPassword() {
-        return ""; // TODO EXERCISE implement.
+        return this.passwordHash;
     }
 
     @Override
     public String getUsername() {
-        return ""; // TODO EXERCISE implement.
+        return this.emailAddress;
     }
 
     @Override

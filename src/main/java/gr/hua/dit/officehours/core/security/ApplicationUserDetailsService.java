@@ -23,11 +23,31 @@ public class ApplicationUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-        // TODO EXERCISE:
-        // 1. Find the Person via findByEmailAddressIgnoreCase(username.strip()).
-        // 2. If absent, throw UsernameNotFoundException.
-        // 3. Return ApplicationUserDetails(id, email, passwordHash, type).
-        // Until implemented, the application starts, but login always fails.
-        throw new UsernameNotFoundException("Exercise 1: load users from PersonRepository");
+        if (username == null) throw new NullPointerException();
+        if (username.isBlank()) throw new IllegalArgumentException();
+        final Person person = this.personRepository
+            .findByEmailAddressIgnoreCase(username)
+            .orElse(null);
+        if (person == null) {
+            throw new UsernameNotFoundException("person with emailAddress" + username + " does not exist");
+        }
+        return new ApplicationUserDetails(
+            person.getId(),
+            person.getEmailAddress(),
+            person.getPasswordHash(),
+            person.getType()
+        );
+
+        // One-line alternative:
+        /*
+        return this.personRepository.findByEmailAddressIgnoreCase(username.strip())
+            .map(person -> new ApplicationUserDetails(
+                    person.getId(),
+                    person.getEmailAddress(),
+                    person.getPasswordHash(),
+                    person.getType())
+            )
+            .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+        */
     }
 }
