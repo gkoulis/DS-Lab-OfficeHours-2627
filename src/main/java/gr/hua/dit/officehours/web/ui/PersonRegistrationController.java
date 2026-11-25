@@ -4,10 +4,12 @@ import gr.hua.dit.officehours.core.model.PersonType;
 import gr.hua.dit.officehours.core.service.PersonRegistrationService;
 import gr.hua.dit.officehours.core.service.model.PersonRegistrationRequest;
 import gr.hua.dit.officehours.core.service.model.PersonRegistrationResult;
+import jakarta.validation.Valid;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,13 +44,16 @@ public class PersonRegistrationController {
     @PostMapping("/register")
     public String handleFormSubmission(
         final Authentication authentication,
-        @ModelAttribute("personRegistrationRequest") final PersonRegistrationRequest personRegistrationRequest,
+        @Valid @ModelAttribute("personRegistrationRequest") final PersonRegistrationRequest personRegistrationRequest,
+        final BindingResult bindingResult, // IMPORTANT: BindingResult **MUST** come immediately after the @Valid argument!
         final Model model
     ) {
         if (AuthUtils.isAuthenticated(authentication)) {
             return "redirect:/profile"; // already logged in.
         }
-        // TODO Form validation + UI errors.
+        if (bindingResult.hasErrors()) {
+            return "register";
+        }
         final PersonRegistrationResult personRegistrationResult = this.personRegistrationService.register(personRegistrationRequest);
         if (personRegistrationResult.created()) {
             return "redirect:/login"; // registration successful - redirect to login form (not yet ready)

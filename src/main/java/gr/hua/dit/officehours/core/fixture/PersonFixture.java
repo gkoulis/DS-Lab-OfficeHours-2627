@@ -8,6 +8,7 @@ import gr.hua.dit.officehours.core.repository.PersonRepository;
 
 import jakarta.annotation.PostConstruct;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import org.slf4j.Logger;
@@ -22,9 +23,12 @@ public final class PersonFixture {
     private static Logger LOGGER = LoggerFactory.getLogger(PersonFixture.class);
 
     private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public PersonFixture(final PersonRepository personRepository) {
+    public PersonFixture(final PersonRepository personRepository,
+                         final PasswordEncoder passwordEncoder) {
         this.personRepository = personRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -51,7 +55,7 @@ public final class PersonFixture {
             person.setEmailAddress(huaId + "@hua.gr");
             person.setMobilePhoneNumber(fakeValuesGenerator.phoneNumber().cellPhone());
             person.setType(PersonType.STUDENT);
-            person.setPasswordHash("<hash>");
+            person.setPasswordHash(this.passwordEncoder.encode("1234"));
             this.personRepository.save(person);
         }
 
@@ -67,7 +71,7 @@ public final class PersonFixture {
             person.setEmailAddress(huaId + "@hua.gr");
             person.setMobilePhoneNumber(fakeValuesGenerator.phoneNumber().cellPhone());
             person.setType(PersonType.TEACHER);
-            person.setPasswordHash("<hash>");
+            person.setPasswordHash(this.passwordEncoder.encode("1234"));
             this.personRepository.save(person);
         }
 

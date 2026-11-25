@@ -15,8 +15,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Initializes application.
+ *
+ * @deprecated see {@link gr.hua.dit.officehours.core.fixture.PersonFixture}
  */
 // @Service
+@Deprecated
 public class InitializationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InitializationService.class);
@@ -30,7 +33,7 @@ public class InitializationService {
         this.initialized = new AtomicBoolean(false);
     }
 
-    @PostConstruct
+    // @PostConstruct
     public void populateDatabaseWithInitialData() {
         final boolean alreadyInitialized = this.initialized.getAndSet(true);
         if (alreadyInitialized) {

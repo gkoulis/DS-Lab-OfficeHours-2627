@@ -9,8 +9,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+
 import jakarta.persistence.UniqueConstraint;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.Instant;
 
 /**
@@ -29,32 +37,52 @@ import java.time.Instant;
         @Index(name = "idx_person_last_name", columnList = "last_name")
     }
 )
-public class Person {
+public final class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
     private Long id;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 20)
     @Column(name = "hua_id", nullable = false, length = 20)
     private String huaId;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 18)
     @Column(name = "mobile_phone_number", nullable = false, length = 18)
     private String mobilePhoneNumber; // E164
 
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
+    @Email
     @Column(name = "email_address", nullable = false, length = 100)
     private String emailAddress;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 20)
     private PersonType type;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 255)
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
